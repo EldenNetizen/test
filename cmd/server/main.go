@@ -1,23 +1,58 @@
 package main
 
 import (
-	"fmt"
-	"time"
+	"net/http"
+
+	_ "github.com/EldenNetizen/test/internal/handler"
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
-func threadTest(ch chan int) {
-	for i := 0; i < 5; i++ {
-		fmt.Println("Thread Test: ", i)
-		ch <- i
-		time.Sleep(5 * time.Second)
+func pong(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{
+		"message": "pong",
+	})
+}
+
+func someFunc() error {
+	return errors.New("something went wrong")
+}
+
+var logger *zap.Logger
+
+func InitLogger() {
+	logger, _ = zap.NewProduction()
+}
+
+func simpleHttpGet(url string) {
+	resp, err := http.Get(url)
+	if err != nil {
+		logger.Error(
+			"Error fetching url..",
+			zap.String("url", url),
+			zap.Error(err))
+	} else {
+		logger.Info("Success..",
+			zap.String("statusCode", resp.Status),
+			zap.String("url", url))
+		resp.Body.Close()
 	}
-	close(ch)
 }
 
 func main() {
-	ch := make(chan int)
-	go threadTest(ch)
-	for v := range ch {
-		fmt.Println("Received from channel: ", v)
-	}
+	// engine := gin.Default()
+	// engine.GET("/ping", pong)
+	// engine.Run()
+
+	// err := someFunc()
+	// if err != nil {
+	// 	err = errors.WithStack(err)
+
+	// 	err = errors.Wrap(err, "failed to execute someFunc")
+	// 	fmt.Printf("%+v\n", err)
+
+	// }
+	InitLogger()
+	defer logger.Sync()
 }
