@@ -1,4 +1,4 @@
-module github.com/EldenNetizen/waever-downloadWorkflowFormAttachment
+module github.com/EldenNetizen/test
 
 go 1.26.4
 
